@@ -11,12 +11,38 @@
 
 
 
+
+        <script>
+            async function refreshAccessToken() {
+                const refreshToken = localStorage.getItem("refreshToken");
+                try {
+                    const response = await axios.post('http://127.0.0.1:8000/api/token/refresh/', { refresh: refreshToken });
+
+                    const newAccessToken = response.data.access;
+
+                    localStorage.setItem("accessToken", newAccessToken);
+
+                    console.log('Access token has been refreshed');
+                } catch (error) {
+                    console.error('Error refreshing access token:', error);
+                }
+            }
+
+            function startTokenRefreshTimer() {
+                const refreshInterval = 15 * 60 * 1000;
+                refreshAccessToken();
+
+                setInterval(refreshAccessToken, refreshInterval);
+            }
+
+            startTokenRefreshTimer();
+        </script>
     </head>
 
     <body>
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">Your App Name</a>
+            <a class="navbar-brand" href="#">User Dashboard</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -28,7 +54,18 @@
             </div>
         </nav>
 
-
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Search input -->
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="fullNameInput" placeholder="Search by full name">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" id="searchButton" type="button"
+                            onclick="searchFullname()">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="msgDiv" style="color: red;"></div>
 
         <table class="table">
@@ -44,42 +81,83 @@
             <tbody id="userData"></tbody>
         </table>
 
-        <!-- Add Bootstrap JS scripts (jQuery and Popper.js are required) -->
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
         <script>
-            const apiUrl = "http://127.0.0.1:8000/users/"; // Replace with your API URL
+
+
+            // Search
+            function searchFullname() {
+
+                var query = $("#fullNameInput").val();
+                console.log(query, "ffffff", typeof (query))
+
+
+                const apiUrl = "http://127.0.0.1:8000/users/" + query;
+                const AuthStr = localStorage.getItem("accessToken");
+
+                console.log(apiUrl)
+
+                axios.get(apiUrl, { 'headers': { 'Authorization': "Bearer " + AuthStr } })
+                    .then(response => {
+                        console.log("API Response:", response.data);
+
+                        const msgDiv = document.getElementById("msgDiv");
+                        msgDiv.style.color = "green";
+                        
+
+                        updateNavigationButtons(false);
+
+                        populateTable(response.data);
+                    })
+                    .catch(error => {
+                        console.error("API Error:", error.response.data.detail);
+
+                        const msgDiv = document.getElementById("msgDiv");
+                        if (error.response && error.response.data && error.response.data.detail) {
+                            const errorMessages = error.response.data.detail;
+                            msgDiv.style.color = "red";
+                            msgDiv.textContent = errorMessages;
+                        } else {
+                            msgDiv.style.color = "red";
+                            msgDiv.textContent = "API Error: An unknown error occurred.";
+                        }
+
+                        updateNavigationButtons(true);
+                    })
+
+            }
+
+
+
+            const apiUrl = "http://127.0.0.1:8000/users/";
             const AuthStr = localStorage.getItem("accessToken");
 
 
             function logout() {
-                // Remove the access token from local storage
                 localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
 
-                // Redirect to the login page (replace with your login page URL)
                 window.location.href = "http://127.0.0.1:5500/frontend/login.html";
             }
 
             if (!localStorage.getItem("accessToken")) {
-                // If not present, redirect to the login page
                 window.location.href = "http://127.0.0.1:5500/frontend/login.html";
             } else {
-                const apiUrl = "http://127.0.0.1:8000/users/"; // Replace with your API URL
+                const apiUrl = "http://127.0.0.1:8000/users/";
                 const AuthStr = localStorage.getItem("accessToken");
             }
 
-            // Function to update the navigation buttons based on API response
             function updateNavigationButtons(error) {
                 const toggleBtn = document.getElementById("toggle-btn");
 
                 if (error) {
-                    // If there is an error, show "Login" and "Register" buttons
                     const loginBtn = document.createElement("li");
                     loginBtn.className = "nav-item";
                     const loginLink = document.createElement("a");
                     loginLink.className = "nav-link";
-                    loginLink.href = "http://127.0.0.1:5500/frontend/login.html"; // Add your login URL here
+                    loginLink.href = "http://127.0.0.1:5500/frontend/login.html";
                     loginLink.textContent = "Login";
                     loginBtn.appendChild(loginLink);
 
@@ -87,20 +165,20 @@
                     registerBtn.className = "nav-item";
                     const registerLink = document.createElement("a");
                     registerLink.className = "nav-link";
-                    registerLink.href = "#"; // Add your register URL here
+                    registerLink.href = "#";
                     registerLink.textContent = "Register";
                     registerBtn.appendChild(registerLink);
 
                     toggleBtn.appendChild(loginBtn);
                     toggleBtn.appendChild(registerBtn);
                 } else {
-                    // If no error, show "Logout" button
                     const logoutBtn = document.createElement("li");
                     logoutBtn.className = "nav-item";
                     const logoutLink = document.createElement("a");
                     logoutLink.className = "nav-link";
-                    logoutLink.href = "#"; // Add your logout URL here
+                    logoutLink.href = "#";
                     logoutLink.textContent = "Logout";
+                    logoutLink.className += "";
                     logoutLink.addEventListener("click", logout, false)
                     logoutBtn.appendChild(logoutLink);
 
@@ -108,14 +186,12 @@
                 }
             }
 
-            // Function to populate the table with API response data
             function populateTable(data) {
                 const userDataTable = document.getElementById("userData");
 
                 data.forEach(user => {
                     const row = document.createElement("tr");
 
-                    // Create table cells for each data field
                     const fullNameCell = document.createElement("td");
                     fullNameCell.textContent = user.fullname || "-";
                     const emailCell = document.createElement("td");
@@ -134,33 +210,25 @@
                     row.appendChild(dobCell);
                     row.appendChild(profilePhotoCell);
 
-                    // Append the row to the table body
                     userDataTable.appendChild(row);
                 });
             }
 
-            // Use Axios to make an HTTP GET request to the API
             axios.get(apiUrl, { 'headers': { 'Authorization': "Bearer " + AuthStr } })
                 .then(response => {
-                    // Handle the API response here
                     console.log("API Response:", response.data);
 
-                    // Display the success message
                     const msgDiv = document.getElementById("msgDiv");
                     msgDiv.style.color = "green";
-                    msgDiv.textContent = "User data fetched.";
+                    
 
-                    // Update the navigation buttons with no error
                     updateNavigationButtons(false);
 
-                    // Populate the table with API response data
                     populateTable(response.data);
                 })
                 .catch(error => {
-                    // Handle any errors that occur during the request
                     console.error("API Error:", error.response.data.detail);
 
-                    // Display the error messages from the API response, if available
                     const msgDiv = document.getElementById("msgDiv");
                     if (error.response && error.response.data && error.response.data.detail) {
                         const errorMessages = error.response.data.detail;
@@ -171,9 +239,47 @@
                         msgDiv.textContent = "API Error: An unknown error occurred.";
                     }
 
-                    // Update the navigation buttons with an error
                     updateNavigationButtons(true);
                 });
+
+
+            // Search
+            function searchFullname() {
+                var query = $("#fullNameInput").val();
+                const apiUrl = "http://127.0.0.1:8000/users/" + query;
+                const AuthStr = localStorage.getItem("accessToken");
+
+                const userDataTable = document.getElementById("userData");
+                userDataTable.innerHTML = "";
+                axios
+                    .get(apiUrl, { headers: { Authorization: "Bearer " + AuthStr } })
+                    .then((response) => {
+                        console.log("API Response:", response.data);
+
+                        const msgDiv = document.getElementById("msgDiv");
+                        msgDiv.style.color = "green";
+                        
+
+                        updateNavigationButtons(false);
+
+                        populateTable(response.data);
+                    })
+                    .catch((error) => {
+                        console.error("API Error:", error.response.data.detail);
+
+                        const msgDiv = document.getElementById("msgDiv");
+                        if (error.response && error.response.data && error.response.data.detail) {
+                            const errorMessages = error.response.data.detail;
+                            msgDiv.style.color = "red";
+                            msgDiv.textContent = errorMessages;
+                        } else {
+                            msgDiv.style.color = "red";
+                            msgDiv.textContent = "API Error: An unknown error occurred.";
+                        }
+
+                        updateNavigationButtons(true);
+                    });
+            }
 
 
         </script>

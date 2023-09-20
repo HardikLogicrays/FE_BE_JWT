@@ -94,11 +94,10 @@
                 confirm_password: confirmPassword,
             }
 
-            console.log("==================")
             apiUrl = "http://127.0.0.1:8000/register/";
             axios.post(apiUrl, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data' // Set the content type to 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data'
                 }
             }).then(response => {
                 console.log("API Response: ", response.data)
@@ -113,9 +112,7 @@
 
                     const fieldErrors = error.response.data;
                     msgDiv.style.color = "red";
-                    msgDiv.innerHTML = ''; // Clear any previous error messages
-
-                    // Loop through field errors and display them in the UI
+                    msgDiv.innerHTML = '';
                     for (const fieldName in fieldErrors) {
                         if (fieldErrors.hasOwnProperty(fieldName)) {
                             const errorMessages = fieldErrors[fieldName];

@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .models import CustomUser
-
+from rest_framework.parsers import MultiPartParser
 
 # Create your views here.
 
@@ -18,6 +18,7 @@ class RegisterView(generics.GenericAPIView):
     authentication_classes = []
     permission_classes = []
     serializer_class = RegisterSerializer
+    parser_classes = [MultiPartParser]  
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -50,8 +51,10 @@ class LoginView(generics.GenericAPIView):
 
             resp = {
                 "refresh": str(refresh),
-                "access": str(refresh.access_token)
+                "access": str(refresh.access_token),
+                "msg": "Login Successfully"
             }
+            print(resp,"========>>>>>>")
             return Response(resp, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

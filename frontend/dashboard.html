@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Home</title>
+        <!-- Add Bootstrap CSS link -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+
+    </head>
+
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Your App Name</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul id="toggle-btn" class="navbar-nav ml-auto">
+                    <!-- This will be dynamically updated -->
+                </ul>
+            </div>
+        </nav>
+
+
+        <div id="msgDiv" style="color: red;"></div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    <th>Date of Birth</th>
+                    <th>Profile Photo</th>
+                </tr>
+            </thead>
+            <tbody id="userData"></tbody>
+        </table>
+
+        <!-- Add Bootstrap JS scripts (jQuery and Popper.js are required) -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script>
+            const apiUrl = "http://127.0.0.1:8000/users/"; // Replace with your API URL
+            const AuthStr = localStorage.getItem("accessToken");
+
+
+            function logout() {
+                // Remove the access token from local storage
+                localStorage.removeItem("accessToken");
+
+                // Redirect to the login page (replace with your login page URL)
+                window.location.href = "http://127.0.0.1:5500/frontend/login.html";
+            }
+
+            if (!localStorage.getItem("accessToken")) {
+                // If not present, redirect to the login page
+                window.location.href = "http://127.0.0.1:5500/frontend/login.html";
+            } else {
+                const apiUrl = "http://127.0.0.1:8000/users/"; // Replace with your API URL
+                const AuthStr = localStorage.getItem("accessToken");
+            }
+
+            // Function to update the navigation buttons based on API response
+            function updateNavigationButtons(error) {
+                const toggleBtn = document.getElementById("toggle-btn");
+
+                if (error) {
+                    // If there is an error, show "Login" and "Register" buttons
+                    const loginBtn = document.createElement("li");
+                    loginBtn.className = "nav-item";
+                    const loginLink = document.createElement("a");
+                    loginLink.className = "nav-link";
+                    loginLink.href = "http://127.0.0.1:5500/frontend/login.html"; // Add your login URL here
+                    loginLink.textContent = "Login";
+                    loginBtn.appendChild(loginLink);
+
+                    const registerBtn = document.createElement("li");
+                    registerBtn.className = "nav-item";
+                    const registerLink = document.createElement("a");
+                    registerLink.className = "nav-link";
+                    registerLink.href = "#"; // Add your register URL here
+                    registerLink.textContent = "Register";
+                    registerBtn.appendChild(registerLink);
+
+                    toggleBtn.appendChild(loginBtn);
+                    toggleBtn.appendChild(registerBtn);
+                } else {
+                    // If no error, show "Logout" button
+                    const logoutBtn = document.createElement("li");
+                    logoutBtn.className = "nav-item";
+                    const logoutLink = document.createElement("a");
+                    logoutLink.className = "nav-link";
+                    logoutLink.href = "#"; // Add your logout URL here
+                    logoutLink.textContent = "Logout";
+                    logoutLink.addEventListener("click", logout, false)
+                    logoutBtn.appendChild(logoutLink);
+
+                    toggleBtn.appendChild(logoutBtn);
+                }
+            }
+
+            // Function to populate the table with API response data
+            function populateTable(data) {
+                const userDataTable = document.getElementById("userData");
+
+                data.forEach(user => {
+                    const row = document.createElement("tr");
+
+                    // Create table cells for each data field
+                    const fullNameCell = document.createElement("td");
+                    fullNameCell.textContent = user.fullname || "-";
+                    const emailCell = document.createElement("td");
+                    emailCell.textContent = user.email || "-";
+                    const phoneNumberCell = document.createElement("td");
+                    phoneNumberCell.textContent = user.phone_number || "-";
+                    const dobCell = document.createElement("td");
+                    dobCell.textContent = user.dob || "-";
+                    const profilePhotoCell = document.createElement("td");
+                    profilePhotoCell.textContent = user.profile_photo || "-";
+
+                    // Append table cells to the row
+                    row.appendChild(fullNameCell);
+                    row.appendChild(emailCell);
+                    row.appendChild(phoneNumberCell);
+                    row.appendChild(dobCell);
+                    row.appendChild(profilePhotoCell);
+
+                    // Append the row to the table body
+                    userDataTable.appendChild(row);
+                });
+            }
+
+            // Use Axios to make an HTTP GET request to the API
+            axios.get(apiUrl, { 'headers': { 'Authorization': "Bearer " + AuthStr } })
+                .then(response => {
+                    // Handle the API response here
+                    console.log("API Response:", response.data);
+
+                    // Display the success message
+                    const msgDiv = document.getElementById("msgDiv");
+                    msgDiv.style.color = "green";
+                    msgDiv.textContent = "User data fetched.";
+
+                    // Update the navigation buttons with no error
+                    updateNavigationButtons(false);
+
+                    // Populate the table with API response data
+                    populateTable(response.data);
+                })
+                .catch(error => {
+                    // Handle any errors that occur during the request
+                    console.error("API Error:", error.response.data.detail);
+
+                    // Display the error messages from the API response, if available
+                    const msgDiv = document.getElementById("msgDiv");
+                    if (error.response && error.response.data && error.response.data.detail) {
+                        const errorMessages = error.response.data.detail;
+                        msgDiv.style.color = "red";
+                        msgDiv.textContent = errorMessages;
+                    } else {
+                        msgDiv.style.color = "red";
+                        msgDiv.textContent = "API Error: An unknown error occurred.";
+                    }
+
+                    // Update the navigation buttons with an error
+                    updateNavigationButtons(true);
+                });
+
+
+        </script>
+    </body>
+
+</html>

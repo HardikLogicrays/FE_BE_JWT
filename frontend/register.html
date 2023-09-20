@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <title>Register</title>
+    </head>
+
+    <body>
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            Register
+                        </div>
+                        <div class="card-body">
+                            <form id="registerForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Fullname</label>
+                                    <input type="text" class="form-control" id="fullname" name="fullname"
+                                        placeholder="Enter your Fullname">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email address</label>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                        placeholder="Enter your Email">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phone number</label>
+                                    <input type="number" class="form-control" id="phone_number" name="phone_number"
+                                        placeholder="Enter your Phone Number">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">DOB</label>
+                                    <input type="date" class="form-control" id="dob" name="dob"
+                                        placeholder="Enter your Birthday">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Profile photo</label>
+                                    <input type="file" class="form-control" id="profile_photo" name="profile_photo"
+                                        placeholder="Enter your Profile Photo">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password"
+                                        placeholder="Enter your Password">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="confirm_password"
+                                        name="confirm_password" placeholder="Enter your Confirm Password">
+                                </div>
+                                <button id="registerSubmitBtn" type="submit" class="btn btn-primary"
+                                    onclick="registerFormSubmit()">Register</button>
+                            </form>
+                            <!-- Add a div to display errors -->
+                            <div id="msgDiv" style="color: red;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+        const registerForm = document.getElementById("registerForm");
+        const registerSubmitBtn = document.getElementById("registerSubmitBtn");
+
+        function registerFormSubmit() {
+            event.preventDefault();
+
+            const msgDiv = document.getElementById("msgDiv");
+
+            const fullName = document.getElementById("fullname").value;
+            const email = document.getElementById("email").value;
+            const phoneNumber = document.getElementById("phone_number").value;
+            const dob = document.getElementById("dob").value;
+            const profilePhoto = document.getElementById("profile_photo");
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirm_password").value;
+            const profilePhotoFile = profilePhoto.files[0];
+
+            const formData = {
+                fullname: fullName,
+                email: email,
+                phone_number: phoneNumber,
+                dob: dob,
+                profile_photo: profilePhotoFile,
+                password: password,
+                confirm_password: confirmPassword,
+            }
+
+            console.log("==================")
+            apiUrl = "http://127.0.0.1:8000/register/";
+            axios.post(apiUrl, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data' // Set the content type to 'multipart/form-data'
+                }
+            }).then(response => {
+                console.log("API Response: ", response.data)
+                if (response && response.data && response.data.email) {
+                    console.log("SUCCESS: ", response.data.email)
+                    window.location.href = "http://127.0.0.1:5500/frontend/login.html";
+                }
+            }).catch((error) => {
+                console.error("API Error:", error);
+                if (error.response && error.response.data) {
+                    console.log("FAILED: ", error.response.data);
+
+                    const fieldErrors = error.response.data;
+                    msgDiv.style.color = "red";
+                    msgDiv.innerHTML = ''; // Clear any previous error messages
+
+                    // Loop through field errors and display them in the UI
+                    for (const fieldName in fieldErrors) {
+                        if (fieldErrors.hasOwnProperty(fieldName)) {
+                            const errorMessages = fieldErrors[fieldName];
+                            errorMessages.forEach((errorMessage) => {
+                                const errorElement = document.createElement("div");
+                                errorElement.textContent = fieldName + ": " + errorMessage;
+                                msgDiv.appendChild(errorElement);
+                            });
+                        }
+                    }
+                }
+            });
+
+        }
+
+
+    </script>
+
+</html>

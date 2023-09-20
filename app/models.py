@@ -32,7 +32,6 @@ class CustomUserManager(BaseUserManager):
         return user
 
 
-# email, password, phone_number, fullname, profile_photo, dob
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=254, unique=True)
     phone_number = models.IntegerField(null=True, blank=True)

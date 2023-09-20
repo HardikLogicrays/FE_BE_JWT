@@ -41,10 +41,12 @@ INSTALLED_APPS = [
     'app',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'drf_yasg'
+    'drf_yasg',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -167,3 +169,10 @@ SWAGGER_SETTINGS = {
 LOGIN_EXEMPT_URLS = [
     '/login/',  # Add the URL for your login view here
 ]
+
+import os
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+CORS_ALLOW_ALL_ORIGINS = True

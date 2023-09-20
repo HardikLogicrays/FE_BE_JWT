@@ -1,5 +1,5 @@
 asgiref==3.7.2
-backports.zoneinfo==0.2.1
+# backports.zoneinfo==0.2.1
 Django==4.2.5
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.0
@@ -13,3 +13,6 @@ PyYAML==6.0.1
 sqlparse==0.4.4
 typing-extensions==4.8.0
 uritemplate==4.1.1
+django-cors-headers
+django-extra-fields
+psycopg2-binary

@@ -103,7 +103,7 @@
                 console.log("API Response: ", response.data)
                 if (response && response.data && response.data.email) {
                     console.log("SUCCESS: ", response.data.email)
-                    window.location.href = "http://127.0.0.1:5500/frontend/login.html";
+                    window.location.href = "http://127.0.0.1:5000/frontend/login.html";
                 }
             }).catch((error) => {
                 console.error("API Error:", error);

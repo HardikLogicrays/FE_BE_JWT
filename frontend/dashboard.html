@@ -139,11 +139,11 @@
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("refreshToken");
 
-                window.location.href = "http://127.0.0.1:5500/frontend/login.html";
+                window.location.href = "http://127.0.0.1:5000/frontend/login.html";
             }
 
             if (!localStorage.getItem("accessToken")) {
-                window.location.href = "http://127.0.0.1:5500/frontend/login.html";
+                window.location.href = "http://127.0.0.1:5000/frontend/login.html";
             } else {
                 const apiUrl = "http://127.0.0.1:8000/users/";
                 const AuthStr = localStorage.getItem("accessToken");
@@ -157,7 +157,7 @@
                     loginBtn.className = "nav-item";
                     const loginLink = document.createElement("a");
                     loginLink.className = "nav-link";
-                    loginLink.href = "http://127.0.0.1:5500/frontend/login.html";
+                    loginLink.href = "http://127.0.0.1:5000/frontend/login.html";
                     loginLink.textContent = "Login";
                     loginBtn.appendChild(loginLink);
 

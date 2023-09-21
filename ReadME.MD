@@ -40,6 +40,6 @@
 
 
 - Landing Page: http://127.0.0.1:5000/frontend/index.html
-- Login Page: http://127.0.0.1:5500/frontend/login.html
-- Register Page: http://127.0.0.1:5500/frontend/register.html
-- Dashboard Page: http://127.0.0.1:5500/frontend/dashboard.html
+- Login Page: http://127.0.0.1:5000/frontend/login.html
+- Register Page: http://127.0.0.1:5000/frontend/register.html
+- Dashboard Page: http://127.0.0.1:5000/frontend/dashboard.html
